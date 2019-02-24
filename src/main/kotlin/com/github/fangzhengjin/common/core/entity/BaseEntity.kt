@@ -62,15 +62,15 @@ abstract class BaseEntity : IdEntity() {
     @Column(name = "is_delete")
     var delete = false
 
-//    @PrePersist
-//    fun onPersist() {
-//        createdTime = if (Objects.isNull(createdTime)) Date() else createdTime
-//        updatedTime = if (Objects.isNull(updatedTime)) Date() else updatedTime
-//    }
-//
-//    @PreUpdate
-//    fun onUpdate() {
-//        updatedTime = Date()
-//    }
+    @PrePersist
+    fun onPersist() {
+        createdTime = if (Objects.isNull(createdTime)) Date() else createdTime
+        modifiedTime = if (Objects.isNull(modifiedTime)) Date() else modifiedTime
+    }
+
+    @PreUpdate
+    fun onUpdate() {
+        modifiedTime = Date()
+    }
 
 }
