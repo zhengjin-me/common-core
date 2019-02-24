@@ -36,14 +36,12 @@ abstract class IdEntity : Serializable {
     @JSONField(name = "id")
     @Access(value = AccessType.PROPERTY)
     @XmlTransient
-    @Column(name = "id")
     var id: String? = null
 
     @ApiModelProperty(hidden = true, readOnly = true, accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @JSONField(serialize = false)
     @Version
     @XmlTransient
-    @Column(name = "version")
     var version: Int = 0
 
 }
