@@ -1,6 +1,7 @@
 package com.github.fangzhengjin.common.core.entity
 
 import com.alibaba.fastjson.annotation.JSONField
+import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.annotations.ApiModelProperty
 import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.CreatedDate
@@ -25,7 +26,8 @@ abstract class BaseEntity : IdEntity() {
 
     @ApiModelProperty(readOnly = true, accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @XmlTransient
-    @JSONField(name = "createdTime")
+    @JSONField(name = "createdTime", format = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @OrderBy("created_time desc")
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
@@ -46,7 +48,8 @@ abstract class BaseEntity : IdEntity() {
      */
     @ApiModelProperty(readOnly = true, accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @XmlTransient
-    @JSONField(name = "modifiedTime")
+    @JSONField(name = "modifiedTime", format = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     open var modifiedTime: Date? = null
