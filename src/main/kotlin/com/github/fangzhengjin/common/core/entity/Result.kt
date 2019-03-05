@@ -14,10 +14,10 @@ import java.io.Serializable
  * @date 2019/1/28 14:52
  */
 class Result<T> @JvmOverloads constructor(
-        var code: Int? = 200,
-        var message: String? = "",
-        @Suppress("UNCHECKED_CAST")
-        var body: T? = "" as T
+    var code: Int? = 200,
+    var message: String? = "",
+    @Suppress("UNCHECKED_CAST")
+    var body: T? = "" as T
 ) : Serializable {
 
     val isOk: Boolean
@@ -35,9 +35,9 @@ class Result<T> @JvmOverloads constructor(
         @JvmOverloads
         fun <T> ok(message: String? = null): Result<T> {
             return Result(
-                    code = HttpStatus.OK.value(),
-                    message = message ?: HttpStatus.OK.reasonPhrase,
-                    body = null
+                code = HttpStatus.OK.value(),
+                message = message ?: HttpStatus.OK.reasonPhrase,
+                body = null
             )
         }
 
@@ -45,21 +45,32 @@ class Result<T> @JvmOverloads constructor(
         @JvmOverloads
         fun <T> ok(body: T?, message: String? = null): Result<T> {
             return Result(
-                    code = HttpStatus.OK.value(),
-                    message = message ?: HttpStatus.OK.reasonPhrase,
-                    body = body
+                code = HttpStatus.OK.value(),
+                message = message ?: HttpStatus.OK.reasonPhrase,
+                body = body
             )
         }
 
+        @JvmOverloads
         @JvmStatic
-        fun <T> ok(body: T?, clazz: Class<T>, fields: List<String>): String {
+        fun <T> ok(
+            body: T?,
+            clazz: Class<T>? = null,
+            includeFields: MutableList<String> = mutableListOf(),
+            excludeFields: MutableList<String> = mutableListOf()
+        ): String {
+            val propertyPreFilter = SimplePropertyPreFilter(clazz)
+            propertyPreFilter.includes.addAll(includeFields)
+            propertyPreFilter.excludes.addAll(excludeFields)
+
             return if (body != null) {
                 JSON.toJSONString(
-                        Result(
-                                code = HttpStatus.OK.value(),
-                                message = HttpStatus.OK.reasonPhrase,
-                                body = body
-                        ), SimplePropertyPreFilter(clazz, *fields.toTypedArray()))
+                    Result(
+                        code = HttpStatus.OK.value(),
+                        message = HttpStatus.OK.reasonPhrase,
+                        body = body
+                    ), propertyPreFilter
+                )
             } else {
                 ""
             }
@@ -68,56 +79,56 @@ class Result<T> @JvmOverloads constructor(
         @JvmStatic
         @JvmOverloads
         fun <T> fail(
-                message: String? = null,
-                code: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR
+            message: String? = null,
+            code: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR
         ): Result<T> {
             return Result(
-                    code = code.value(),
-                    message = message ?: code.reasonPhrase,
-                    body = null
+                code = code.value(),
+                message = message ?: code.reasonPhrase,
+                body = null
             )
         }
 
         @JvmStatic
         @JvmOverloads
         fun <T> fail(
-                message: String? = null,
-                code: Int
+            message: String? = null,
+            code: Int
         ): Result<T> {
             return Result(
-                    code = code,
-                    message = message,
-                    body = null
+                code = code,
+                message = message,
+                body = null
             )
         }
 
         @JvmStatic
         @JvmOverloads
         fun <T> fail(
-                message: String? = null,
-                code: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                body: T?
+            message: String? = null,
+            code: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+            body: T?
         ): Result<T> {
             @Suppress("UNCHECKED_CAST")
             return Result(
-                    code = code.value(),
-                    message = message ?: code.reasonPhrase,
-                    body = body
+                code = code.value(),
+                message = message ?: code.reasonPhrase,
+                body = body
             )
         }
 
         @JvmStatic
         @JvmOverloads
         fun <T> fail(
-                message: String? = null,
-                code: Int,
-                body: T?
+            message: String? = null,
+            code: Int,
+            body: T?
         ): Result<T> {
             @Suppress("UNCHECKED_CAST")
             return Result(
-                    code = code,
-                    message = message,
-                    body = body
+                code = code,
+                message = message,
+                body = body
             )
         }
     }
