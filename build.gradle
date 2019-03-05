@@ -8,12 +8,14 @@ plugins {
 
 apply plugin: 'kotlin-jpa'
 apply plugin: 'io.spring.dependency-management'
+apply from: "version.gradle"
 apply from: "binary.gradle"
 
 group "com.github.fangzhengjin"
-version VERSION_NAME
+version getVersionCode()
 sourceCompatibility = '1.8'
 
+bootJar.enabled = false
 jar.enabled = true
 
 repositories {
