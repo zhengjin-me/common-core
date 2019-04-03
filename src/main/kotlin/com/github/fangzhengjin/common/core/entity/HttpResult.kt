@@ -7,13 +7,13 @@ import java.io.Serializable
 
 /**
  * @version V1.0
- * @title: Result
+ * @title: HttpResult
  * @package com.github.fangzhengjin.common.core.entity
  * @description: 响应数据标准类
  * @author fangzhengjin
  * @date 2019/1/28 14:52
  */
-class Result<T> @JvmOverloads constructor(
+class HttpResult<T> @JvmOverloads constructor(
     var code: Int? = 200,
     var message: String? = "",
     @Suppress("UNCHECKED_CAST")
@@ -33,8 +33,8 @@ class Result<T> @JvmOverloads constructor(
 
         @JvmStatic
         @JvmOverloads
-        fun <T> ok(message: String? = null): Result<T> {
-            return Result(
+        fun <T> ok(message: String? = null): HttpResult<T> {
+            return HttpResult(
                 code = HttpStatus.OK.value(),
                 message = message ?: HttpStatus.OK.reasonPhrase,
                 body = null
@@ -43,8 +43,8 @@ class Result<T> @JvmOverloads constructor(
 
         @JvmStatic
         @JvmOverloads
-        fun <T> ok(body: T?, message: String? = null): Result<T> {
-            return Result(
+        fun <T> ok(body: T?, message: String? = null): HttpResult<T> {
+            return HttpResult(
                 code = HttpStatus.OK.value(),
                 message = message ?: HttpStatus.OK.reasonPhrase,
                 body = body
@@ -65,7 +65,7 @@ class Result<T> @JvmOverloads constructor(
 
             return if (body != null) {
                 JSON.toJSONString(
-                    Result(
+                    HttpResult(
                         code = HttpStatus.OK.value(),
                         message = HttpStatus.OK.reasonPhrase,
                         body = body
@@ -81,8 +81,8 @@ class Result<T> @JvmOverloads constructor(
         fun <T> fail(
             message: String? = null,
             code: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR
-        ): Result<T> {
-            return Result(
+        ): HttpResult<T> {
+            return HttpResult(
                 code = code.value(),
                 message = message ?: code.reasonPhrase,
                 body = null
@@ -94,8 +94,8 @@ class Result<T> @JvmOverloads constructor(
         fun <T> fail(
             message: String? = null,
             code: Int
-        ): Result<T> {
-            return Result(
+        ): HttpResult<T> {
+            return HttpResult(
                 code = code,
                 message = message,
                 body = null
@@ -108,9 +108,9 @@ class Result<T> @JvmOverloads constructor(
             message: String? = null,
             code: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
             body: T?
-        ): Result<T> {
+        ): HttpResult<T> {
             @Suppress("UNCHECKED_CAST")
-            return Result(
+            return HttpResult(
                 code = code.value(),
                 message = message ?: code.reasonPhrase,
                 body = body
@@ -123,9 +123,9 @@ class Result<T> @JvmOverloads constructor(
             message: String? = null,
             code: Int,
             body: T?
-        ): Result<T> {
+        ): HttpResult<T> {
             @Suppress("UNCHECKED_CAST")
-            return Result(
+            return HttpResult(
                 code = code,
                 message = message,
                 body = body
