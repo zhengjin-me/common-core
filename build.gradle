@@ -10,7 +10,7 @@ apply plugin: 'kotlin-jpa'
 apply plugin: 'io.spring.dependency-management'
 apply from: "maven.gradle"
 apply from: "travis.gradle"
-apply from: "bintray.gradlee"
+apply from: "bintray.gradle"
 
 group "com.github.fangzhengjin"
 version VERSION_CODE
