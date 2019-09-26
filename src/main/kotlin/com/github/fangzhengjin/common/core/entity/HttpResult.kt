@@ -56,8 +56,8 @@ class HttpResult<T> @JvmOverloads constructor(
         fun <T> ok(
             body: T?,
             clazz: Class<T>? = null,
-            includeFields: MutableList<String> = mutableListOf(),
-            excludeFields: MutableList<String> = mutableListOf()
+            includeFields: Set<String> = setOf(),
+            excludeFields: Set<String> = setOf()
         ): String {
             val propertyPreFilter = SimplePropertyPreFilter(clazz)
             propertyPreFilter.includes.addAll(includeFields)
