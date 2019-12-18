@@ -8,9 +8,10 @@ val groupName: String by extra
 plugins {
     val kotlinVersion: String by System.getProperties()
     val springBootVersion: String by System.getProperties()
+
     kotlin("plugin.jpa") version kotlinVersion
     id("org.springframework.boot") version springBootVersion
-    id("io.spring.dependency-management") version "1.0.7.RELEASE"
+    id("io.spring.dependency-management") version "1.0.8.RELEASE"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     id("com.jfrog.bintray") version "1.8.4"

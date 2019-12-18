@@ -26,8 +26,8 @@ abstract class BaseEntity : IdEntity() {
 
     @ApiModelProperty(readOnly = true, accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @XmlTransient
-    @JSONField(name = "createdTime", format = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+//    @JSONField(name = "createdTime", format = "yyyy-MM-dd HH:mm:ss")
+//    @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @OrderBy("created_time desc")
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
@@ -48,8 +48,8 @@ abstract class BaseEntity : IdEntity() {
      */
     @ApiModelProperty(readOnly = true, accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @XmlTransient
-    @JSONField(name = "modifiedTime", format = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+//    @JSONField(name = "modifiedTime", format = "yyyy-MM-dd HH:mm:ss")
+//    @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     open var modifiedTime: Date? = null
