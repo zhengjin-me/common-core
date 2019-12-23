@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiModelProperty
 import org.hibernate.annotations.GenericGenerator
 import java.io.Serializable
 import javax.persistence.*
+import javax.xml.bind.annotation.XmlAccessType
+import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlTransient
 
 /**
@@ -16,6 +18,7 @@ import javax.xml.bind.annotation.XmlTransient
  * @date 2019/1/28 14:52
  */
 @MappedSuperclass
+@XmlAccessorType(XmlAccessType.NONE)
 abstract class IdEntity : Serializable {
 
     //

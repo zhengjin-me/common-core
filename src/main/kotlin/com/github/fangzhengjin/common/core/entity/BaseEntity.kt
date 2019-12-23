@@ -10,6 +10,8 @@ import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.util.*
 import javax.persistence.*
+import javax.xml.bind.annotation.XmlAccessType
+import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlTransient
 
 /**
@@ -22,6 +24,7 @@ import javax.xml.bind.annotation.XmlTransient
  */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener::class)
+@XmlAccessorType(XmlAccessType.NONE)
 abstract class BaseEntity : IdEntity() {
 
     @ApiModelProperty(readOnly = true, accessMode = ApiModelProperty.AccessMode.READ_ONLY)
