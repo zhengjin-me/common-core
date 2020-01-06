@@ -24,7 +24,7 @@ interface BaseRepository<T : BaseEntity, ID : Serializable> : JpaRepository<T, I
     fun findActiveOne(@Param("id") id: ID): T?
 
     @Query("select x from #{#entityName} x where x.delete <> true")
-    fun findActiveAll(): MutableList<T>
+    fun findActiveAll(): List<T>
 
     @Modifying
     @Query("update #{#entityName} a set a.delete = true where a.id = :id")
@@ -32,5 +32,5 @@ interface BaseRepository<T : BaseEntity, ID : Serializable> : JpaRepository<T, I
 
     @Modifying
     @Query("update #{#entityName} a set a.delete = true where a.id in :ids")
-    fun softDelete(@Param("ids") ids: MutableList<ID>)
+    fun softDelete(@Param("ids") ids: List<ID>)
 }
