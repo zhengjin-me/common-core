@@ -1,6 +1,6 @@
 package com.github.fangzhengjin.common.core.entity
 
-import com.alibaba.fastjson.annotation.JSONField
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.annotations.ApiModelProperty
 import org.hibernate.annotations.GenericGenerator
 import java.io.Serializable
@@ -36,13 +36,12 @@ abstract class IdEntity : Serializable {
     @ApiModelProperty(readOnly = true, accessMode = ApiModelProperty.AccessMode.READ_ONLY)
     @GenericGenerator(name = "system-uuid", strategy = "uuid")
     @GeneratedValue(generator = "system-uuid")
-    @JSONField(name = "id")
     @Access(value = AccessType.PROPERTY)
     @XmlTransient
     var id: String? = null
 
     @ApiModelProperty(hidden = true, readOnly = true, accessMode = ApiModelProperty.AccessMode.READ_ONLY)
-    @JSONField(serialize = false)
+    @JsonIgnore
     @Version
     @XmlTransient
     var version: Int = 0

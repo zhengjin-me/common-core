@@ -1,9 +1,16 @@
 package com.github.fangzhengjin.common.core.entity
 
-import com.alibaba.fastjson.JSON
-import com.alibaba.fastjson.serializer.SimplePropertyPreFilter
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.core.json.JsonReadFeature
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
+import com.fasterxml.jackson.databind.util.StdDateFormat
 import org.springframework.http.HttpStatus
 import java.io.Serializable
+import java.util.*
 
 /**
  * @version V1.0
@@ -13,11 +20,11 @@ import java.io.Serializable
  * @author fangzhengjin
  * @date 2019/1/28 14:52
  */
-class HttpResult<T> @JvmOverloads constructor(
-    var code: Int? = 200,
-    var message: String? = "",
-    @Suppress("UNCHECKED_CAST")
-    var body: T? = "" as T
+class HttpResult<T> private constructor(
+        var code: Int? = 200,
+        var message: String? = "",
+        @Suppress("UNCHECKED_CAST")
+        var body: T? = "" as T
 ) : Serializable {
 
     val isOk: Boolean
@@ -26,18 +33,37 @@ class HttpResult<T> @JvmOverloads constructor(
         }
 
     override fun toString(): String {
-        return JSON.toJSONString(this)
+        val objectMapper = ObjectMapper()
+        defaultJacksonConfig(objectMapper)
+        return objectMapper.writeValueAsString(this)
     }
 
     companion object {
 
         @JvmStatic
+        fun defaultJacksonConfig(objectMapper: ObjectMapper) {
+            objectMapper.setSerializationInclusion(JsonInclude.Include.ALWAYS)
+            // 默认为ISO8601格式时间
+            objectMapper.dateFormat = StdDateFormat().withTimeZone(TimeZone.getTimeZone("Asia/Shanghai"))
+            // 关闭反序列化出现未定义属性时 报错
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            // 关闭日期序列化为时间戳的功能
+            objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            // 关闭序列化的时候没有为属性找到getter方法 报错
+            objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+            // 允许出现特殊字符和转义符
+            objectMapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true)
+            // 允许出现单引号
+            objectMapper.configure(JsonReadFeature.ALLOW_SINGLE_QUOTES.mappedFeature(), true)
+        }
+
+        @JvmStatic
         @JvmOverloads
-        fun <T> ok(message: String? = null): HttpResult<T> {
+        fun ok(message: String? = null): HttpResult<String> {
             return HttpResult(
-                code = HttpStatus.OK.value(),
-                message = message ?: HttpStatus.OK.reasonPhrase,
-                body = null
+                    code = HttpStatus.OK.value(),
+                    message = message ?: HttpStatus.OK.reasonPhrase,
+                    body = null
             )
         }
 
@@ -55,24 +81,32 @@ class HttpResult<T> @JvmOverloads constructor(
         @JvmStatic
         fun <T> ok(
             body: T?,
-            clazz: Class<T>? = null,
             includeFields: Set<String> = setOf(),
             excludeFields: Set<String> = setOf()
         ): String {
-            val propertyPreFilter = SimplePropertyPreFilter(clazz)
-            propertyPreFilter.includes.addAll(includeFields)
-            propertyPreFilter.excludes.addAll(excludeFields)
-
-            return if (body != null) {
-                JSON.toJSONString(
-                    HttpResult(
-                        code = HttpStatus.OK.value(),
-                        message = HttpStatus.OK.reasonPhrase,
-                        body = body
-                    ), propertyPreFilter
-                )
+            if (includeFields.isNotEmpty() && excludeFields.isNotEmpty()) throw RuntimeException("includeFields and excludeFields cannot be used simultaneously")
+            val filter by lazy {
+                if (includeFields.isNotEmpty()) {
+                    // include
+                    return@lazy SimpleBeanPropertyFilter.filterOutAllExcept(includeFields)
+                }
+                if (excludeFields.isNotEmpty()) {
+                    // exclude
+                    return@lazy SimpleBeanPropertyFilter.serializeAllExcept(excludeFields)
+                }
+                null
+            }
+            val objectMapper = ObjectMapper()
+            defaultJacksonConfig(objectMapper)
+            val httpResult = HttpResult(
+                    code = HttpStatus.OK.value(),
+                    message = HttpStatus.OK.reasonPhrase,
+                    body = body
+            )
+            return if (filter == null) {
+                objectMapper.writeValueAsString(httpResult)
             } else {
-                ""
+                objectMapper.setFilterProvider(SimpleFilterProvider().setDefaultFilter(filter)).writeValueAsString(httpResult)
             }
         }
 
@@ -126,10 +160,19 @@ class HttpResult<T> @JvmOverloads constructor(
         ): HttpResult<T> {
             @Suppress("UNCHECKED_CAST")
             return HttpResult(
-                code = code,
-                message = message,
-                body = body
+                    code = code,
+                    message = message,
+                    body = body
             )
         }
     }
+}
+
+class Test {
+    var aaa: String = "aaa"
+    var bbb: String = "bbb"
+}
+
+fun main() {
+    println(HttpResult.ok(Test(), excludeFields = setOf("bbb", "aaa")))
 }
