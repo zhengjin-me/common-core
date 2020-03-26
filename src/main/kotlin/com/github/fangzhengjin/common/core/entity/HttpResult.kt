@@ -2,6 +2,7 @@ package com.github.fangzhengjin.common.core.entity
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fangzhengjin.common.core.jackson.utils.JacksonSerializeUtils
+import org.springframework.data.domain.Page
 import org.springframework.http.HttpStatus
 import java.io.Serializable
 import kotlin.reflect.KClass
@@ -66,13 +67,8 @@ class HttpResult<T> private constructor(
                     message = HttpStatus.OK.reasonPhrase,
                     body = body
             )
-            if (!includeFields.isNullOrEmpty()) {
-                // include
-                return JacksonSerializeUtils.serializeFieldsFilterInclude(httpResult, clazz, *includeFields.toTypedArray())
-            }
-            if (!excludeFields.isNullOrEmpty()) {
-                // exclude
-                return JacksonSerializeUtils.serializeFieldsFilterExclude(httpResult, clazz, *excludeFields.toTypedArray())
+            if (!includeFields.isNullOrEmpty() || !excludeFields.isNullOrEmpty()) {
+                return JacksonSerializeUtils.serializeFieldsFilter(httpResult, clazz, includeFields.toList(), excludeFields.toList())
             }
             throw RuntimeException("includeFields or excludeFields list not found")
         }
@@ -132,5 +128,28 @@ class HttpResult<T> private constructor(
                     body = body
             )
         }
+
+        @JvmOverloads
+        fun <T> page(page: Page<T>, message: String? = null): HttpResult<PageResult<T>> {
+            return HttpResult(
+                    code = HttpStatus.OK.value(),
+                    message = message ?: HttpStatus.OK.reasonPhrase,
+                    body = PageResult(
+                            content = page.content,
+                            totalElements = page.totalElements,
+                            totalPages = page.totalPages,
+                            currentPage = page.number + 1
+                    )
+            )
+        }
+
+        @JvmOverloads
+        fun <T> page(page: Page<T>, clazz: KClass<*>, includeFields: Set<String> = setOf(), excludeFields: Set<String> = setOf()): String {
+            if (!includeFields.isNullOrEmpty() || !excludeFields.isNullOrEmpty()) {
+                return JacksonSerializeUtils.serializeFieldsFilter(page(page), clazz, includeFields.toList(), excludeFields.toList())
+            }
+            throw RuntimeException("includeFields or excludeFields list not found")
+        }
+
     }
 }
