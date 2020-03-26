@@ -38,9 +38,8 @@ class JacksonJsonCustomizeSerializeAnnotationHandler(
 
         val objectMapper =
                 if (defaultObjectMapper != null) {
-                    ObjectMapper()
-                            .setConfig(defaultObjectMapper.deserializationConfig)
-                            .setConfig(defaultObjectMapper.serializationConfig)
+                    // 如果项目中已经定义了 就使用项目里的参数创建一个新的
+                    defaultObjectMapper.copy()
                 } else {
                     JacksonSerializeUtils.defaultJacksonConfig(ObjectMapper())
                 }

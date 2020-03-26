@@ -18,7 +18,7 @@ class HttpResult<T> private constructor(
         var code: Int? = 200,
         var message: String? = "",
         @Suppress("UNCHECKED_CAST")
-        var body: T? = "" as T
+        var body: T? = null
 ) : Serializable {
 
     val isOk: Boolean

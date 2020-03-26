@@ -9,8 +9,8 @@ import kotlin.reflect.KClass
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class JsonSerializeInclude(
-        val value: Array<String>,
-        val type: KClass<*>
+        val type: KClass<*>,
+        val value: Array<String>
 )
 
 /**
