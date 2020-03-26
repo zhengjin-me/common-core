@@ -6,6 +6,7 @@ import com.github.fangzhengjin.common.core.jackson.annotation.JsonSerializeExclu
 import com.github.fangzhengjin.common.core.jackson.annotation.JsonSerializeInclude
 import com.github.fangzhengjin.common.core.jackson.annotation.JsonSerializeIncludes
 import com.github.fangzhengjin.common.core.jackson.filter.JacksonJsonCustomizeSerializeFieldsFilter
+import com.github.fangzhengjin.common.core.jackson.utils.JacksonSerializeUtils
 import org.springframework.core.MethodParameter
 import org.springframework.http.MediaType
 import org.springframework.web.context.request.NativeWebRequest
@@ -16,7 +17,9 @@ import javax.servlet.http.HttpServletResponse
 /**
  * 对于使用自定义Jackson注解对spring返回值进行处理
  */
-class JacksonJsonCustomizeSerializeAnnotationHandler : HandlerMethodReturnValueHandler {
+class JacksonJsonCustomizeSerializeAnnotationHandler(
+        private val defaultObjectMapper: ObjectMapper?
+) : HandlerMethodReturnValueHandler {
     override fun supportsReturnType(returnType: MethodParameter): Boolean {
         // 如果有我们自定义的 JSON 注解 就用我们这个Handler 来处理
         return returnType.hasMethodAnnotation(JsonSerializeInclude::class.java) ||
@@ -32,7 +35,16 @@ class JacksonJsonCustomizeSerializeAnnotationHandler : HandlerMethodReturnValueH
         val nativeResponse = webRequest.getNativeResponse(HttpServletResponse::class.java)!!
         val methodAnnotations = returnType.methodAnnotations
         nativeResponse.contentType = MediaType.APPLICATION_JSON_UTF8_VALUE
-        val objectMapper = ObjectMapper()
+
+        val objectMapper =
+                if (defaultObjectMapper != null) {
+                    ObjectMapper()
+                            .setConfig(defaultObjectMapper.deserializationConfig)
+                            .setConfig(defaultObjectMapper.serializationConfig)
+                } else {
+                    JacksonSerializeUtils.defaultJacksonConfig(ObjectMapper())
+                }
+
         val jacksonJsonCustomizeSerializeFieldsFilter = JacksonJsonCustomizeSerializeFieldsFilter()
         methodAnnotations.forEach {
             when (it) {
@@ -70,6 +82,7 @@ class JacksonJsonCustomizeSerializeAnnotationHandler : HandlerMethodReturnValueH
                 }
             }
         }
+        objectMapper.setFilterProvider(jacksonJsonCustomizeSerializeFieldsFilter)
         nativeResponse.writer.write(objectMapper.writeValueAsString(returnValue))
     }
 }
