@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.util.StdDateFormat
 import com.github.fangzhengjin.common.core.jackson.filter.JacksonJsonCustomizeSerializeFieldsFilter
 import java.util.*
+import kotlin.reflect.KClass
 
 object JacksonSerializeUtils {
 
@@ -30,30 +31,30 @@ object JacksonSerializeUtils {
     }
 
     @JvmStatic
-    fun serializeFieldsFilterInclude(data: Any, type: Class<*>, vararg fields: String): String {
+    fun serializeFieldsFilterInclude(data: Any, type: KClass<*>, vararg fields: String): String {
         val objectMapper = defaultJacksonConfig(ObjectMapper())
         objectMapper.setFilterProvider(JacksonJsonCustomizeSerializeFieldsFilter().include(type, *fields))
-        objectMapper.addMixIn(type, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
+        objectMapper.addMixIn(type::class.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
         return objectMapper.writeValueAsString(data)
     }
 
     @JvmStatic
-    fun serializeFieldsFilterExclude(data: Any, type: Class<*>, vararg fields: String): String {
+    fun serializeFieldsFilterExclude(data: Any, type: KClass<*>, vararg fields: String): String {
         val objectMapper = defaultJacksonConfig(ObjectMapper())
         objectMapper.setFilterProvider(JacksonJsonCustomizeSerializeFieldsFilter().exclude(type, *fields))
-        objectMapper.addMixIn(type, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
+        objectMapper.addMixIn(type::class.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
         return objectMapper.writeValueAsString(data)
     }
 
     @JvmStatic
-    fun serializeFieldsFilter(data: Any, type: Class<*>, includes: List<String> = listOf(), excludes: List<String> = listOf()): String {
+    fun serializeFieldsFilter(data: Any, type: KClass<*>, includes: List<String> = listOf(), excludes: List<String> = listOf()): String {
         val objectMapper = defaultJacksonConfig(ObjectMapper())
         objectMapper.setFilterProvider(
                 JacksonJsonCustomizeSerializeFieldsFilter()
                         .include(type, *includes.toTypedArray())
                         .exclude(type, *excludes.toTypedArray())
         )
-        objectMapper.addMixIn(type, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
+        objectMapper.addMixIn(type::class.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
         return objectMapper.writeValueAsString(data)
     }
 }

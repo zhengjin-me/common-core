@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fangzhengjin.common.core.jackson.utils.JacksonSerializeUtils
 import org.springframework.http.HttpStatus
 import java.io.Serializable
+import kotlin.reflect.KClass
 
 /**
  * @version V1.0
@@ -54,9 +55,9 @@ class HttpResult<T> private constructor(
 
         @JvmOverloads
         @JvmStatic
-        fun <T> ok(
+        fun <T : Any> ok(
                 body: T,
-                clazz: Class<T>,
+                clazz: KClass<T>,
                 includeFields: Set<String> = setOf(),
                 excludeFields: Set<String> = setOf()
         ): String {
