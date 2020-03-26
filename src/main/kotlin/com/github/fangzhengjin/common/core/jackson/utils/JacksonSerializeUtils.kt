@@ -34,7 +34,7 @@ object JacksonSerializeUtils {
     fun serializeFieldsFilterInclude(data: Any, type: KClass<*>, vararg fields: String): String {
         val objectMapper = defaultJacksonConfig(ObjectMapper())
         objectMapper.setFilterProvider(JacksonJsonCustomizeSerializeFieldsFilter().include(type, *fields))
-        objectMapper.addMixIn(type::class.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
+        objectMapper.addMixIn(type.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
         return objectMapper.writeValueAsString(data)
     }
 
@@ -42,7 +42,7 @@ object JacksonSerializeUtils {
     fun serializeFieldsFilterExclude(data: Any, type: KClass<*>, vararg fields: String): String {
         val objectMapper = defaultJacksonConfig(ObjectMapper())
         objectMapper.setFilterProvider(JacksonJsonCustomizeSerializeFieldsFilter().exclude(type, *fields))
-        objectMapper.addMixIn(type::class.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
+        objectMapper.addMixIn(type.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
         return objectMapper.writeValueAsString(data)
     }
 
@@ -54,7 +54,7 @@ object JacksonSerializeUtils {
                         .include(type, *includes.toTypedArray())
                         .exclude(type, *excludes.toTypedArray())
         )
-        objectMapper.addMixIn(type::class.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
+        objectMapper.addMixIn(type.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
         return objectMapper.writeValueAsString(data)
     }
 }

@@ -51,7 +51,7 @@ class JacksonJsonCustomizeSerializeAnnotationHandler(
                 is JsonSerializeInclude -> {
                     if (it.value.isNotEmpty()) {
                         jacksonJsonCustomizeSerializeFieldsFilter.include(it.type, *it.value)
-                        objectMapper.addMixIn(it.type::class.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
+                        objectMapper.addMixIn(it.type.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
                     }
                 }
                 is JsonSerializeIncludes -> {
@@ -59,7 +59,7 @@ class JacksonJsonCustomizeSerializeAnnotationHandler(
                         it.value.forEach { include ->
                             if (include.value.isNotEmpty()) {
                                 jacksonJsonCustomizeSerializeFieldsFilter.include(include.type, *include.value)
-                                objectMapper.addMixIn(include.type::class.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
+                                objectMapper.addMixIn(include.type.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
                             }
                         }
                     }
@@ -67,7 +67,7 @@ class JacksonJsonCustomizeSerializeAnnotationHandler(
                 is JsonSerializeExclude -> {
                     if (it.value.isNotEmpty()) {
                         jacksonJsonCustomizeSerializeFieldsFilter.exclude(it.type, *it.value)
-                        objectMapper.addMixIn(it.type::class.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
+                        objectMapper.addMixIn(it.type.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
                     }
                 }
                 is JsonSerializeExcludes -> {
@@ -75,7 +75,7 @@ class JacksonJsonCustomizeSerializeAnnotationHandler(
                         it.value.forEach { exclude ->
                             if (exclude.value.isNotEmpty()) {
                                 jacksonJsonCustomizeSerializeFieldsFilter.exclude(exclude.type, *exclude.value)
-                                objectMapper.addMixIn(exclude.type::class.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
+                                objectMapper.addMixIn(exclude.type.java, JacksonJsonCustomizeSerializeFieldsFilter::class.java)
                             }
                         }
                     }
