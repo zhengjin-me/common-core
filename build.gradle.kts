@@ -1,59 +1,164 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-val versionCode: String by extra
-val swaggerVersion: String by extra
-val groupName: String by extra
-
 plugins {
+    // global version
     val kotlinVersion: String by System.getProperties()
+    val dokkaVersion: String by System.getProperties()
+    val ktlintVersion: String by System.getProperties()
     val springBootVersion: String by System.getProperties()
+    val springDependencyManagementVersion: String by System.getProperties()
 
+    idea
+    `maven-publish`
+    signing
     id("org.springframework.boot") version springBootVersion
-    id("io.spring.dependency-management") version "1.0.8.RELEASE"
+    id("io.spring.dependency-management") version springDependencyManagementVersion
+    id("org.jetbrains.dokka") version dokkaVersion
+    id("org.jlleitschuh.gradle.ktlint") version ktlintVersion
     kotlin("jvm") version kotlinVersion
+    kotlin("kapt") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
-    id("com.jfrog.bintray") version "1.8.4"
+    kotlin("plugin.jpa") version kotlinVersion
 }
 
-apply {
-    from("maven.gradle.kts")
-    from("travis.gradle.kts")
-    from("bintray.gradle")
-}
+val releasesRepoUrl = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
 
-group = groupName
-version = versionCode
+val mavenUsername = (findProperty("MAVEN_CENTER_USERNAME") ?: System.getenv("MAVEN_CENTER_USERNAME")) as String?
+val mavenPassword = (findProperty("MAVEN_CENTER_PASSWORD") ?: System.getenv("MAVEN_CENTER_PASSWORD")) as String?
+
+val hutoolVersion: String by project
+val querydslVersion: String by project
+
+group = "me.zhengjin"
+version = "0.0.1-SNAPSHOT"
+
+/**
+ * 源码JDK版本
+ */
 java.sourceCompatibility = JavaVersion.VERSION_1_8
+/**
+ * 编译后字节码可运行环境的版本
+ */
+java.targetCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    mavenLocal()
+    maven("https://maven.aliyun.com/repository/public")
+    mavenCentral()
+//    maven {
+//        url = releasesRepoUrl
+//        credentials {
+//            username = mavenUsername
+//            password = mavenPassword
+//        }
+//    }
+//    maven {
+//        url = snapshotsRepoUrl
+//        credentials {
+//            username = mavenUsername
+//            password = mavenPassword
+//        }
+//    }
+}
+
+dependencies {
+    kapt("com.querydsl:querydsl-apt:$querydslVersion:jpa")
+    api("com.querydsl:querydsl-jpa:$querydslVersion")
+    api("org.springframework.boot:spring-boot-starter-web")
+    api("org.springframework.boot:spring-boot-starter-validation")
+    api("com.fasterxml.jackson.module:jackson-module-kotlin")
+    api("org.springframework.boot:spring-boot-starter-data-jpa")
+    // Hutool
+    api("cn.hutool:hutool-core:$hutoolVersion")
+    api(kotlin("reflect"))
+    api(kotlin("stdlib-jdk8"))
+    testCompileOnly("org.springframework.boot:spring-boot-starter-test") {
+        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+    }
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+            pom {
+                name.set(project.name)
+                description.set(project.name)
+                url.set("https://github.com/fangzhengjin/common-core")
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://zhengjin.me/licenses/MIT-License.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("fangzhengjin")
+                        name.set("fangzhengjin")
+                        email.set("fangzhengjin@gmail.com")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/fangzhengjin/common-core")
+                }
+                versionMapping {
+                    usage("java-api") {
+                        fromResolutionOf("runtimeClasspath")
+                    }
+                    usage("java-runtime") {
+                        fromResolutionResult()
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+            credentials {
+                username = mavenUsername
+                password = mavenPassword
+            }
+        }
+    }
+}
 
 tasks {
     bootJar {
         enabled = false
     }
+
     jar {
         enabled = true
+        classifier = ""
     }
-    withType<KotlinCompile> {
+
+    /**
+     * 定义那些注解修饰的类自动开放
+     */
+    allOpen {
+        annotations(
+            "javax.persistence.Entity",
+            "javax.persistence.MappedSuperclass",
+            "javax.persistence.Embeddable"
+        )
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    /**
+     * kotlin编译
+     */
+    compileKotlin {
         kotlinOptions {
             freeCompilerArgs = listOf("-Xjsr305=strict")
             jvmTarget = "1.8"
         }
     }
-}
-
-repositories {
-    mavenLocal()
-    maven("https://maven.aliyun.com/repository/public/")
-    mavenCentral()
-}
-
-dependencies {
-    compileOnly("org.springframework.boot:spring-boot-starter-web")
-    compileOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
-    compileOnly("org.springframework.boot:spring-boot-starter-data-jpa")
-    //Swagger2
-    compileOnly("io.springfox:springfox-swagger2:$swaggerVersion")
-    compileOnly("io.springfox:springfox-swagger-ui:$swaggerVersion")
-    compileOnly("io.springfox:springfox-bean-validators:$swaggerVersion")
-    api(kotlin("reflect"))
-    api(kotlin("stdlib-jdk8"))
 }

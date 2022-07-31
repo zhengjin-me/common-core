@@ -1,0 +1,3 @@
+me.zhengjin.common.core.jackson.autoconfig.JacksonJsonCustomizeSerializeAnnotationHandlerAutoConfiguration
+me.zhengjin.common.core.jpa.autoconfig.JpaHelperAutoConfiguration
+me.zhengjin.common.core.jpa.autoconfig.JpaCommentAutoConfiguration

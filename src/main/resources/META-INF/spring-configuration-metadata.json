@@ -1,0 +1,30 @@
+{
+  "groups": [
+    {
+      "sourceType": "me.zhengjin.common.core.jpa.autoconfig.JpaCommentProperties",
+      "name": "customize.common.jpa.comment",
+      "type": "me.zhengjin.common.core.jpa.autoconfig.JpaCommentProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "customize.common.jpa.comment.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable jpa comment",
+      "sourceType": "me.zhengjin.common.core.jpa.autoconfig.JpaCommentProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "customize.common.jpa.comment.schema",
+      "type": "java.lang.String",
+      "description": "dataBase schema",
+      "sourceType": "me.zhengjin.common.core.jpa.autoconfig.JpaCommentProperties"
+    },
+    {
+      "name": "customize.common.jpa.comment.alterTableNames",
+      "type": "java.lang.String",
+      "description": "example: all | table1,table2",
+      "sourceType": "me.zhengjin.common.core.jpa.autoconfig.JpaCommentProperties"
+    }
+  ]
+}
