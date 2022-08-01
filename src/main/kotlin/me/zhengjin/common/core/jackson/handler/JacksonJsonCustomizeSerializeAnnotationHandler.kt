@@ -23,9 +23,9 @@ class JacksonJsonCustomizeSerializeAnnotationHandler(
     override fun supportsReturnType(returnType: MethodParameter): Boolean {
         // 如果有我们自定义的 JSON 注解 就用我们这个Handler 来处理
         return returnType.hasMethodAnnotation(JsonSerializeInclude::class.java) ||
-                returnType.hasMethodAnnotation(JsonSerializeIncludes::class.java) ||
-                returnType.hasMethodAnnotation(JsonSerializeExclude::class.java) ||
-                returnType.hasMethodAnnotation(JsonSerializeExcludes::class.java)
+            returnType.hasMethodAnnotation(JsonSerializeIncludes::class.java) ||
+            returnType.hasMethodAnnotation(JsonSerializeExclude::class.java) ||
+            returnType.hasMethodAnnotation(JsonSerializeExcludes::class.java)
     }
 
     override fun handleReturnValue(returnValue: Any?, returnType: MethodParameter, mavContainer: ModelAndViewContainer, webRequest: NativeWebRequest) {

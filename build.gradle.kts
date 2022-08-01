@@ -74,7 +74,6 @@ java.targetCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
     mavenLocal()
-    maven("https://maven.aliyun.com/repository/public")
     mavenCentral()
 //    maven {
 //        url = releasesRepoUrl
