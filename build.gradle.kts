@@ -161,7 +161,7 @@ publishing {
 
 signing {
     setRequired({ isReleaseVersion && gradle.taskGraph.hasTask("publish") })
-    println("开始签名产物")
+    println("产物签名已启用")
     val signingKey: String? by project
     val signingPassword: String? by project
     useInMemoryPgpKeys(signingKey, signingPassword)
