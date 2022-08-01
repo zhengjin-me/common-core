@@ -60,6 +60,9 @@ group = "me.zhengjin"
 // 使用最新的tag名称作为版本号
 version = latestTagVersion
 
+val isReleaseVersion = !version.toString().endsWith("SNAPSHOT")
+println("当前构建产物: [$group:${project.name}:$version]")
+
 /**
  * 源码JDK版本
  */
@@ -117,7 +120,7 @@ publishing {
             pom {
                 name.set(project.name)
                 description.set(project.name)
-                url.set("https://github.com/fangzhengjin/common-core")
+                url.set("https://github.com/zhengjin-me/common-core")
                 licenses {
                     license {
                         name.set("MIT License")
@@ -132,7 +135,7 @@ publishing {
                     }
                 }
                 scm {
-                    url.set("https://github.com/fangzhengjin/common-core")
+                    url.set("https://github.com/zhengjin-me/common-core")
                 }
                 versionMapping {
                     usage("java-api") {
@@ -147,13 +150,22 @@ publishing {
     }
     repositories {
         maven {
-            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+            url = if (isReleaseVersion) releasesRepoUrl else snapshotsRepoUrl
             credentials {
                 username = mavenUsername
                 password = mavenPassword
             }
         }
     }
+}
+
+signing {
+    setRequired({ isReleaseVersion && gradle.taskGraph.hasTask("publish") })
+    println("开始签名产物")
+    val signingKey: String? by project
+    val signingPassword: String? by project
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign(publishing.publications["mavenJava"])
 }
 
 tasks {
