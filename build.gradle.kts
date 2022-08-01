@@ -1,3 +1,5 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     // global version
     val kotlinVersion: String by System.getProperties()
@@ -25,11 +27,38 @@ val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/sn
 val mavenUsername = (findProperty("MAVEN_CENTER_USERNAME") ?: System.getenv("MAVEN_CENTER_USERNAME")) as String?
 val mavenPassword = (findProperty("MAVEN_CENTER_PASSWORD") ?: System.getenv("MAVEN_CENTER_PASSWORD")) as String?
 
+val latestTagVersionNumber = ByteArrayOutputStream().use {
+    try {
+        exec {
+            commandLine("git", "rev-list", "--tags", "--max-count=1")
+            standardOutput = it
+        }
+    } catch (e: Exception) {
+        logger.error("Failed to get latest tag version number: [${e.message}]")
+        return@use "unknown"
+    }
+    return@use it.toString().trim()
+}
+
+val latestTagVersion = ByteArrayOutputStream().use {
+    try {
+        exec {
+            commandLine("git", "describe", "--tags", latestTagVersionNumber)
+            standardOutput = it
+        }
+    } catch (e: Exception) {
+        logger.error("Failed to get latest tag version: [${e.message}]")
+        return@use "unknown"
+    }
+    return@use it.toString().trim()
+}
+
 val hutoolVersion: String by project
 val querydslVersion: String by project
 
 group = "me.zhengjin"
-version = "0.0.1-SNAPSHOT"
+// 使用最新的tag名称作为版本号
+version = latestTagVersion
 
 /**
  * 源码JDK版本
