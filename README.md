@@ -1,7 +1,7 @@
 # common-core
 
-[![Build Status](https://img.shields.io/travis/com/fangzhengjin/common-core/master.svg?style=flat-square)](https://travis-ci.com/fangzhengjin/common-core)
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.fangzhengjin/common-core.svg?style=flat-square&color=brightgreen)](https://maven-badges.herokuapp.com/maven-central/com.github.fangzhengjin/common-core/)
+[![Build Status](https://img.shields.io/travis/com/zhengjin-me/common-core/master.svg?style=flat-square)](https://travis-ci.com/fangzhengjin/common-core)
+[![Maven Central](https://img.shields.io/maven-central/v/me.zhengjin/common-core.svg?style=flat-square&color=brightgreen)](https://maven-badges.herokuapp.com/maven-central/me.zhengjin/common-core/)
 ![GitHub](https://img.shields.io/github/license/fangzhengjin/common-core?style=flat-square)
 
 ```
