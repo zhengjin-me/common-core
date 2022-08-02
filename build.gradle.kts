@@ -24,47 +24,19 @@ plugins {
 }
 
 // val releasesRepoUrl = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+// 使用nexusPublishing组件不能写完整路径
 val releasesRepoUrl = uri("https://s01.oss.sonatype.org/service/local/")
 val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
 
 val mavenUsername = (findProperty("MAVEN_CENTER_USERNAME") ?: System.getenv("MAVEN_CENTER_USERNAME")) as String?
 val mavenPassword = (findProperty("MAVEN_CENTER_PASSWORD") ?: System.getenv("MAVEN_CENTER_PASSWORD")) as String?
 
-val latestTagVersionNumber = ByteArrayOutputStream().use {
-    try {
-        exec {
-            commandLine("git", "rev-list", "--tags", "--max-count=1")
-            standardOutput = it
-        }
-    } catch (e: Exception) {
-        logger.error("Failed to get latest tag version number: [${e.message}]")
-        return@use "unknown"
-    }
-    return@use it.toString().trim()
-}
-
-val latestTagVersion = ByteArrayOutputStream().use {
-    try {
-        exec {
-            commandLine("git", "describe", "--tags", latestTagVersionNumber)
-            standardOutput = it
-        }
-    } catch (e: Exception) {
-        logger.error("Failed to get latest tag version: [${e.message}]")
-        return@use "unknown"
-    }
-    return@use it.toString().trim()
-}
-
 val hutoolVersion: String by project
 val querydslVersion: String by project
 
 group = "me.zhengjin"
 // 使用最新的tag名称作为版本号
-version = latestTagVersion
-
-val isReleaseVersion = !version.toString().endsWith("SNAPSHOT")
-println("当前构建产物: [$group:${project.name}:$version]")
+// version = { ext["latestTagVersion"] }
 
 /**
  * 源码JDK版本
@@ -182,6 +154,44 @@ signing {
 }
 
 tasks {
+    register("getLatestTagVersion") {
+        ext["latestTagVersionNumber"] = ByteArrayOutputStream().use {
+            try {
+                exec {
+                    commandLine("git", "rev-list", "--tags", "--max-count=1")
+                    standardOutput = it
+                }
+            } catch (e: Exception) {
+                logger.error("Failed to get latest tag version number: [${e.message}]")
+                return@use "unknown"
+            }
+            return@use it.toString().trim()
+        }
+
+        ext["latestTagVersion"] = ByteArrayOutputStream().use {
+            try {
+                exec {
+                    commandLine("git", "describe", "--tags", ext["latestTagVersionNumber"])
+                    standardOutput = it
+                }
+            } catch (e: Exception) {
+                logger.error("Failed to get latest tag version: [${e.message}]")
+                return@use "unknown"
+            }
+            val tagName = it.toString().trim()
+            return@use Regex("^v?(?<version>\\d+\\.\\d+.\\d+(?:-SNAPSHOT|-snapshot)?)\$").matchEntire(tagName)?.groups?.get("version")?.value
+                ?: throw IllegalStateException("Failed to get latest tag version, tagName: [$tagName]")
+        }
+        project.version = ext["latestTagVersion"]!!
+        ext["isReleaseVersion"] = !version.toString().endsWith("SNAPSHOT", true)
+        println("当前构建产物: [${project.group}:${project.name}:${project.version}]")
+    }
+
+    build {
+        // 执行build之前 先获取版本号
+        dependsOn("getLatestTagVersion")
+    }
+
     bootJar {
         enabled = false
     }
@@ -217,6 +227,6 @@ tasks {
     }
 
     withType<Sign>().configureEach {
-        onlyIf { isReleaseVersion }
+        onlyIf { ext["isReleaseVersion"] as Boolean }
     }
 }
