@@ -5,6 +5,7 @@ plugins {
     val kotlinVersion: String by System.getProperties()
     val dokkaVersion: String by System.getProperties()
     val ktlintVersion: String by System.getProperties()
+    val nexusPublishVersion: String by System.getProperties()
     val springBootVersion: String by System.getProperties()
     val springDependencyManagementVersion: String by System.getProperties()
 
@@ -15,13 +16,15 @@ plugins {
     id("io.spring.dependency-management") version springDependencyManagementVersion
     id("org.jetbrains.dokka") version dokkaVersion
     id("org.jlleitschuh.gradle.ktlint") version ktlintVersion
+    id("io.github.gradle-nexus.publish-plugin") version nexusPublishVersion
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     kotlin("plugin.jpa") version kotlinVersion
 }
 
-val releasesRepoUrl = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+// val releasesRepoUrl = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+val releasesRepoUrl = uri("https://s01.oss.sonatype.org/service/local/")
 val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
 
 val mavenUsername = (findProperty("MAVEN_CENTER_USERNAME") ?: System.getenv("MAVEN_CENTER_USERNAME")) as String?
@@ -147,13 +150,26 @@ publishing {
             }
         }
     }
+// 普通私有库发布
+//    repositories {
+//        maven {
+//            url = if (isReleaseVersion) releasesRepoUrl else snapshotsRepoUrl
+//            credentials {
+//                username = mavenUsername
+//                password = mavenPassword
+//            }
+//        }
+//    }
+}
+
+// maven center 发布, 发布后自动释放
+nexusPublishing {
     repositories {
-        maven {
-            url = if (isReleaseVersion) releasesRepoUrl else snapshotsRepoUrl
-            credentials {
-                username = mavenUsername
-                password = mavenPassword
-            }
+        sonatype {
+            nexusUrl.set(releasesRepoUrl)
+            snapshotRepositoryUrl.set(snapshotsRepoUrl)
+            username.set(mavenUsername)
+            password.set(mavenPassword)
         }
     }
 }
@@ -199,8 +215,8 @@ tasks {
             jvmTarget = "1.8"
         }
     }
-}
 
-tasks.withType<Sign>().configureEach {
-    onlyIf { isReleaseVersion && gradle.taskGraph.hasTask("publish") }
+    withType<Sign>().configureEach {
+        onlyIf { isReleaseVersion }
+    }
 }
