@@ -192,6 +192,11 @@ tasks {
         dependsOn("getLatestTagVersion")
     }
 
+    publish {
+        // 执行publish之前 先获取版本号
+        dependsOn("getLatestTagVersion")
+    }
+
     bootJar {
         enabled = false
     }
