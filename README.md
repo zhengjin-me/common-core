@@ -28,3 +28,12 @@ dependencies {
 JacksonSerializeUtils
 
 ```
+
+```yaml
+customize:
+  common:
+    jpa:
+      comment:
+        enable: true
+        alterTableNames: all
+```
