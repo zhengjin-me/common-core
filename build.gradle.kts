@@ -90,26 +90,32 @@ java {
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
+            val projectUrl: String by project
+            val projectAuthor: String by project
+            val projectAuthorEmail: String by project
+            val licenseName: String by project
+            val licenseUrl: String by project
+
             from(components["java"])
             pom {
                 name.set(project.name)
                 description.set(project.name)
-                url.set("https://github.com/zhengjin-me/common-core")
+                url.set(projectUrl)
                 licenses {
                     license {
-                        name.set("MIT License")
-                        url.set("https://zhengjin.me/licenses/MIT-License.txt")
+                        name.set(licenseName)
+                        url.set(licenseUrl)
                     }
                 }
                 developers {
                     developer {
-                        id.set("fangzhengjin")
-                        name.set("fangzhengjin")
-                        email.set("fangzhengjin@gmail.com")
+                        id.set(projectAuthor)
+                        name.set(projectAuthor)
+                        email.set(projectAuthorEmail)
                     }
                 }
                 scm {
-                    url.set("https://github.com/zhengjin-me/common-core")
+                    url.set(projectUrl)
                 }
                 versionMapping {
                     usage("java-api") {
