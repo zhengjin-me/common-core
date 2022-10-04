@@ -8,6 +8,11 @@
   ],
   "properties": [
     {
+      "name": "customize.common.idEncryptKey",
+      "type": "java.lang.String",
+      "description": "id encrypt key"
+    },
+    {
       "name": "customize.common.jpa.comment.enable",
       "type": "java.lang.Boolean",
       "description": "enable jpa comment",

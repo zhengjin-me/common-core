@@ -84,7 +84,7 @@ abstract class BaseEntity : IdEntity() {
 
     @XmlTransient
     @JsonIgnore
-    @Column(name = "is_delete", columnDefinition = "char(1) NOT NULL DEFAULT 0")
+    @Column(name = "is_delete")
     @JpaComment("删除标记")
     var delete = false
 }
