@@ -22,22 +22,41 @@
  * SOFTWARE.
  */
 
-package me.zhengjin.common.core.base.autoconfig
+package me.zhengjin.common.core.encryptor.serializer
 
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.BeanProperty
+import com.fasterxml.jackson.databind.JsonSerializer
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.ser.ContextualSerializer
+import me.zhengjin.common.core.encryptor.annotation.IdEncryptor
 import me.zhengjin.common.core.utils.IdEncryptionUtils
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.AutoConfiguration
-import org.springframework.context.annotation.Bean
 
 /**
  *
  * @author fangzhengjin
- * @create 2022-10-05 00:56
+ * @create 2022-10-06 00:00
  **/
-@AutoConfiguration
-class IdEncryptAutoConfiguration {
-    @Bean
-    fun idEncryptionUtils(@Value("\${customize.common.idEncryptKey}") idEncryptKey: String): IdEncryptionUtils {
-        return IdEncryptionUtils.init(idEncryptKey)
+class IdEncryptSerializer(
+    private val annotation: IdEncryptor? = null
+) : JsonSerializer<Long>(), ContextualSerializer {
+
+    override fun createContextual(prov: SerializerProvider?, property: BeanProperty?): JsonSerializer<*> {
+        val annotation = property?.getAnnotation(IdEncryptor::class.java)
+        return IdEncryptSerializer(annotation)
+    }
+
+    override fun serialize(value: Long?, gen: JsonGenerator?, serializers: SerializerProvider?) {
+        if (annotation?.serialize == true) {
+            gen?.writeString(
+                if (value == null) {
+                    null
+                } else {
+                    IdEncryptionUtils.encrypt(value)
+                }
+            )
+        } else {
+            gen?.writeObject(value)
+        }
     }
 }

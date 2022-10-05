@@ -22,48 +22,38 @@
  * SOFTWARE.
  */
 
-package me.zhengjin.common.core.entity
+package me.zhengjin.common.core.encryptor.serializer
 
-import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.BeanProperty
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.deser.ContextualDeserializer
 import me.zhengjin.common.core.encryptor.annotation.IdEncryptor
-import me.zhengjin.common.core.jpa.comment.annotation.JpaComment
-import java.io.Serializable
-import javax.persistence.Access
-import javax.persistence.AccessType
-import javax.persistence.Column
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.MappedSuperclass
-import javax.persistence.Version
-import javax.xml.bind.annotation.XmlAccessType
-import javax.xml.bind.annotation.XmlAccessorType
-import javax.xml.bind.annotation.XmlTransient
+import me.zhengjin.common.core.utils.IdEncryptionUtils
 
 /**
- * @version V1.0
- * @title: IdEntity
- * @package me.zhengjin.common.core.entity
- * @description: id基类
+ *
  * @author fangzhengjin
- * @date 2019/1/28 14:52
- */
-@MappedSuperclass
-@XmlAccessorType(XmlAccessType.NONE)
-abstract class IdEntity : Serializable {
+ * @create 2022-10-06 00:00
+ **/
+class IdEncryptDeserializer(
+    private val annotation: IdEncryptor? = null
+) : JsonDeserializer<Long>(), ContextualDeserializer {
 
-    @IdEncryptor
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Access(value = AccessType.PROPERTY)
-    @Column(name = "id")
-    @JpaComment("主键")
-    var id: Long? = null
+    override fun createContextual(ctxt: DeserializationContext?, property: BeanProperty?): JsonDeserializer<*> {
+        val annotation = property?.getAnnotation(IdEncryptor::class.java)
+        return IdEncryptDeserializer(annotation)
+    }
 
-    @JsonIgnore
-    @XmlTransient
-    @Version
-    @Column(name = "version")
-    @JpaComment("版本")
-    var version: Int = 0
+    override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): Long? {
+        if (annotation?.deserialize == true) {
+            return if (p?.valueAsString.isNullOrBlank()) {
+                null
+            } else {
+                IdEncryptionUtils.decrypt(p!!.valueAsString)
+            }
+        }
+        return p?.longValue
+    }
 }
