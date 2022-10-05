@@ -45,15 +45,17 @@ object IdEncryptionUtils {
         return this
     }
 
-    fun encrypt(id: Long): String {
+    fun encrypt(id: Long?): String? {
+        if (id == null) return null
         return aes.encryptBase64(id.toString())
     }
 
-    fun decrypt(id: String): Long {
+    fun decrypt(id: String?): Long? {
+        if (id.isNullOrBlank()) return null
         return aes.decryptStr(id).toLong()
     }
 
-    fun encryptIgnoreError(id: Long): String? {
+    fun encryptIgnoreError(id: Long?): String? {
         return try {
             encrypt(id)
         } catch (ignore: Exception) {
@@ -62,7 +64,7 @@ object IdEncryptionUtils {
         }
     }
 
-    fun decryptIgnoreError(id: String): Long? {
+    fun decryptIgnoreError(id: String?): Long? {
         return try {
             decrypt(id)
         } catch (ignore: Exception) {
@@ -72,6 +74,10 @@ object IdEncryptionUtils {
     }
 
     fun decryptIds(ids: List<String>): List<Long> {
-        return ids.map { decrypt(it) }
+        return ids.map {
+            val data = decrypt(it)
+            ServiceException.requireNotNull(data) { "ID[$it]解密失败" }
+            data!!
+        }
     }
 }
