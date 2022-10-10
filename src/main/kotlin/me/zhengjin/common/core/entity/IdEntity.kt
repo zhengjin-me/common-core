@@ -25,8 +25,10 @@
 package me.zhengjin.common.core.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import me.zhengjin.common.core.encryptor.annotation.IdEncryptor
+import me.zhengjin.common.core.encryptor.annotation.IdDecrypt
+import me.zhengjin.common.core.encryptor.annotation.IdEncrypt
 import me.zhengjin.common.core.jpa.comment.annotation.JpaComment
+import org.hibernate.annotations.GenericGenerator
 import java.io.Serializable
 import javax.persistence.Access
 import javax.persistence.AccessType
@@ -52,9 +54,11 @@ import javax.xml.bind.annotation.XmlTransient
 @XmlAccessorType(XmlAccessType.NONE)
 abstract class IdEntity : Serializable {
 
-    @IdEncryptor
+    @IdEncrypt
+    @IdDecrypt
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
+    @GenericGenerator(name = "native", strategy = "native")
     @Access(value = AccessType.PROPERTY)
     @Column(name = "id")
     @JpaComment("主键")

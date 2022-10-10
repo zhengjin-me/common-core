@@ -25,35 +25,37 @@
 package me.zhengjin.common.core.encryptor.serializer
 
 import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.BeanProperty
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.deser.ContextualDeserializer
-import me.zhengjin.common.core.encryptor.annotation.IdEncryptor
+import me.zhengjin.common.core.exception.ServiceException
 import me.zhengjin.common.core.utils.IdEncryptionUtils
+import org.springframework.util.ReflectionUtils
 
 /**
  *
  * @author fangzhengjin
  * @create 2022-10-06 00:00
  **/
-class IdEncryptDeserializer(
-    private val annotation: IdEncryptor? = null
-) : JsonDeserializer<Long>(), ContextualDeserializer {
+class IdDecryptDeserializer : JsonDeserializer<Any>() {
 
-    override fun createContextual(ctxt: DeserializationContext?, property: BeanProperty?): JsonDeserializer<*> {
-        val annotation = property?.getAnnotation(IdEncryptor::class.java)
-        return IdEncryptDeserializer(annotation)
-    }
-
-    override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): Long? {
-        if (annotation?.deserialize == true) {
-            return if (p?.valueAsString.isNullOrBlank()) {
-                null
-            } else {
-                IdEncryptionUtils.decrypt(p!!.valueAsString)
+    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Any {
+        val clazz = (p.currentValue ?: p.parsingContext.parent.currentValue).javaClass
+        val declaredField = ReflectionUtils.findField(clazz, p.currentName) ?: throw ServiceException("未在[${clazz.name}]中找到属性[${p.currentName}]")
+        return when (declaredField.genericType.typeName) {
+            "java.lang.Long" -> IdEncryptionUtils.decrypt(p.valueAsString)
+            "java.lang.String" -> IdEncryptionUtils.decryptStr(p.valueAsString)
+            "java.util.List<java.lang.Long>" -> {
+                val data: List<String> = p.readValueAs(object : TypeReference<List<String>>() {})
+                IdEncryptionUtils.decryptIds(data)
             }
+
+            "java.util.List<java.lang.String>" -> {
+                val data: List<String> = p.readValueAs(object : TypeReference<List<String>>() {})
+                IdEncryptionUtils.decryptIds(data).map { it.toString() }.toList()
+            }
+
+            else -> throw ServiceException("不支持反序列化的类型")
         }
-        return p?.longValue
     }
 }

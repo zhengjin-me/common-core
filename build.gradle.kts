@@ -35,7 +35,7 @@ val hutoolVersion: String by project
 val querydslVersion: String by project
 
 group = "me.zhengjin"
-// version = "1.0.0-2-SNAPSHOT"
+// version = "1.0.4-2-SNAPSHOT"
 // 使用最新的tag名称作为版本号
 // version = { ext["latestTagVersion"] }
 

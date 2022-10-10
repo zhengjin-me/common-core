@@ -45,17 +45,24 @@ object IdEncryptionUtils {
         return this
     }
 
-    fun encrypt(id: Long?): String? {
-        if (id == null) return null
+    fun encrypt(id: Long): String {
         return aes.encryptBase64(id.toString())
     }
 
-    fun decrypt(id: String?): Long? {
-        if (id.isNullOrBlank()) return null
+    fun decrypt(id: String): Long {
         return aes.decryptStr(id).toLong()
     }
 
+    fun encryptStr(id: String): String {
+        return aes.encryptBase64(id)
+    }
+
+    fun decryptStr(id: String): String {
+        return aes.decryptStr(id)
+    }
+
     fun encryptIgnoreError(id: Long?): String? {
+        if (id == null) return null
         return try {
             encrypt(id)
         } catch (ignore: Exception) {
@@ -65,6 +72,7 @@ object IdEncryptionUtils {
     }
 
     fun decryptIgnoreError(id: String?): Long? {
+        if (id.isNullOrBlank()) return null
         return try {
             decrypt(id)
         } catch (ignore: Exception) {
@@ -73,11 +81,27 @@ object IdEncryptionUtils {
         }
     }
 
-    fun decryptIds(ids: List<String>): List<Long> {
-        return ids.map {
-            val data = decrypt(it)
-            ServiceException.requireNotNull(data) { "ID[$it]解密失败" }
-            data!!
+    fun encryptStrIgnoreError(id: String?): String? {
+        if (id.isNullOrBlank()) return null
+        return try {
+            encryptStr(id)
+        } catch (ignore: Exception) {
+            logger.error("id加密失败", ignore)
+            null
         }
+    }
+
+    fun decryptStrIgnoreError(id: String?): String? {
+        if (id.isNullOrBlank()) return null
+        return try {
+            decryptStr(id)
+        } catch (ignore: Exception) {
+            logger.error("id解密失败", ignore)
+            null
+        }
+    }
+
+    fun decryptIds(ids: List<String>): List<Long> {
+        return ids.map { decrypt(it) }
     }
 }

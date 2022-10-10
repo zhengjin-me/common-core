@@ -25,13 +25,11 @@
 package me.zhengjin.common.core.encryptor.annotation
 
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import me.zhengjin.common.core.encryptor.serializer.IdEncryptDeserializer
 import me.zhengjin.common.core.encryptor.serializer.IdEncryptSerializer
 
 /**
- * id自动加密/解密
+ * id自动加密
  * @author fangzhengjin
  * @create 2022-10-05 23:59
  **/
@@ -40,14 +38,4 @@ import me.zhengjin.common.core.encryptor.serializer.IdEncryptSerializer
 @Retention(AnnotationRetention.RUNTIME)
 @JacksonAnnotationsInside
 @JsonSerialize(using = IdEncryptSerializer::class)
-@JsonDeserialize(using = IdEncryptDeserializer::class)
-annotation class IdEncryptor(
-    /**
-     * 序列化加密
-     */
-    val serialize: Boolean = true,
-    /**
-     * 反序列化解密
-     */
-    val deserialize: Boolean = true
-)
+annotation class IdEncrypt

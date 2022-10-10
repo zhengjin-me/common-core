@@ -22,26 +22,20 @@
  * SOFTWARE.
  */
 
-package me.zhengjin.common.core.encryptor.autoconfig
+package me.zhengjin.common.core.encryptor.annotation
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import me.zhengjin.common.core.utils.IdEncryptionUtils
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.AutoConfiguration
-import org.springframework.context.annotation.Bean
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import com.fasterxml.jackson.annotation.JacksonAnnotationsInside
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import me.zhengjin.common.core.encryptor.serializer.IdDecryptDeserializer
 
 /**
- *
+ * id自动解密
  * @author fangzhengjin
- * @create 2022-10-05 00:56
+ * @create 2022-10-05 23:59
  **/
-@AutoConfiguration
-class IdEncryptAutoConfiguration(
-    private val objectMapper: ObjectMapper
-) : WebMvcConfigurer {
-    @Bean
-    fun idEncryptionUtils(@Value("\${customize.common.idEncryptKey}") idEncryptKey: String): IdEncryptionUtils {
-        return IdEncryptionUtils.init(idEncryptKey)
-    }
-}
+@MustBeDocumented
+@Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+@JacksonAnnotationsInside
+@JsonDeserialize(using = IdDecryptDeserializer::class)
+annotation class IdDecrypt

@@ -25,11 +25,9 @@
 package me.zhengjin.common.core.encryptor.serializer
 
 import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.BeanProperty
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.ser.ContextualSerializer
-import me.zhengjin.common.core.encryptor.annotation.IdEncryptor
+import me.zhengjin.common.core.exception.ServiceException
 import me.zhengjin.common.core.utils.IdEncryptionUtils
 
 /**
@@ -37,26 +35,20 @@ import me.zhengjin.common.core.utils.IdEncryptionUtils
  * @author fangzhengjin
  * @create 2022-10-06 00:00
  **/
-class IdEncryptSerializer(
-    private val annotation: IdEncryptor? = null
-) : JsonSerializer<Long>(), ContextualSerializer {
-
-    override fun createContextual(prov: SerializerProvider?, property: BeanProperty?): JsonSerializer<*> {
-        val annotation = property?.getAnnotation(IdEncryptor::class.java)
-        return IdEncryptSerializer(annotation)
-    }
-
-    override fun serialize(value: Long?, gen: JsonGenerator?, serializers: SerializerProvider?) {
-        if (annotation?.serialize == true) {
-            gen?.writeString(
-                if (value == null) {
-                    null
-                } else {
-                    IdEncryptionUtils.encrypt(value)
+class IdEncryptSerializer : JsonSerializer<Any>() {
+    override fun serialize(value: Any, gen: JsonGenerator?, serializers: SerializerProvider?) {
+        when (value) {
+            is Long -> gen?.writeString(IdEncryptionUtils.encrypt(value))
+            is String -> gen?.writeString(IdEncryptionUtils.encryptStr(value))
+            is Collection<*> -> {
+                when (value.firstOrNull()) {
+                    is Long -> gen?.writeObject(value.map { IdEncryptionUtils.encrypt(it as Long) })
+                    is String -> gen?.writeObject(value.map { IdEncryptionUtils.encryptStr(it as String) })
+                    else -> throw ServiceException("不支持序列化的类型")
                 }
-            )
-        } else {
-            gen?.writeObject(value)
+            }
+
+            else -> throw ServiceException("不支持的序列化类型")
         }
     }
 }

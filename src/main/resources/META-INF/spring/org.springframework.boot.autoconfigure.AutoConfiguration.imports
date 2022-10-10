@@ -2,3 +2,4 @@ me.zhengjin.common.core.jackson.autoconfig.JacksonJsonCustomizeSerializeAnnotati
 me.zhengjin.common.core.jpa.autoconfig.JpaHelperAutoConfiguration
 me.zhengjin.common.core.jpa.autoconfig.JpaCommentAutoConfiguration
 me.zhengjin.common.core.encryptor.autoconfig.IdEncryptAutoConfiguration
+me.zhengjin.common.core.encryptor.autoconfig.IdDecryptProcessConfiguration
