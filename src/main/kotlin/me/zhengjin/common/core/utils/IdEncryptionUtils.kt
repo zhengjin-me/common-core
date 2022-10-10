@@ -24,6 +24,8 @@
 
 package me.zhengjin.common.core.utils
 
+import cn.hutool.crypto.Mode
+import cn.hutool.crypto.Padding
 import cn.hutool.crypto.symmetric.AES
 import me.zhengjin.common.core.exception.ServiceException
 import org.slf4j.LoggerFactory
@@ -37,16 +39,19 @@ object IdEncryptionUtils {
     private val logger = LoggerFactory.getLogger(IdEncryptionUtils::class.java)
     private lateinit var aes: AES
 
-    fun init(idEncryptKey: String): IdEncryptionUtils {
+    fun init(idEncryptKey: String, idEncryptIv: String): IdEncryptionUtils {
         if (idEncryptKey.length != 16) {
             throw ServiceException("密钥长度必须为16位")
         }
-        aes = AES(idEncryptKey.toByteArray())
+        if (idEncryptIv.length != 16) {
+            throw ServiceException("偏移量长度必须为16位")
+        }
+        aes = AES(Mode.ECB, Padding.ZeroPadding, idEncryptKey.toByteArray(), idEncryptKey.toByteArray())
         return this
     }
 
     fun encrypt(id: Long): String {
-        return aes.encryptBase64(id.toString())
+        return aes.encryptHex(id.toString())
     }
 
     fun decrypt(id: String): Long {
@@ -54,7 +59,7 @@ object IdEncryptionUtils {
     }
 
     fun encryptStr(id: String): String {
-        return aes.encryptBase64(id)
+        return aes.encryptHex(id)
     }
 
     fun decryptStr(id: String): String {

@@ -24,7 +24,6 @@
 
 package me.zhengjin.common.core.encryptor.autoconfig
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import me.zhengjin.common.core.utils.IdEncryptionUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -37,11 +36,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
  * @create 2022-10-05 00:56
  **/
 @AutoConfiguration
-class IdEncryptAutoConfiguration(
-    private val objectMapper: ObjectMapper
-) : WebMvcConfigurer {
+class IdEncryptAutoConfiguration : WebMvcConfigurer {
     @Bean
-    fun idEncryptionUtils(@Value("\${customize.common.idEncryptKey}") idEncryptKey: String): IdEncryptionUtils {
-        return IdEncryptionUtils.init(idEncryptKey)
+    fun idEncryptionUtils(
+        @Value("\${customize.common.idEncryptKey}") idEncryptKey: String,
+        @Value("\${customize.common.idEncryptIv}") idEncryptIv: String
+    ): IdEncryptionUtils {
+        return IdEncryptionUtils.init(idEncryptKey, idEncryptIv)
     }
 }
