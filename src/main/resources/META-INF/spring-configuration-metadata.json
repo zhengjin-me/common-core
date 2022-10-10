@@ -13,6 +13,11 @@
       "description": "id encrypt key"
     },
     {
+      "name": "customize.common.idEncryptIv",
+      "type": "java.lang.String",
+      "description": "id encrypt iv"
+    },
+    {
       "name": "customize.common.jpa.comment.enable",
       "type": "java.lang.Boolean",
       "description": "enable jpa comment",
