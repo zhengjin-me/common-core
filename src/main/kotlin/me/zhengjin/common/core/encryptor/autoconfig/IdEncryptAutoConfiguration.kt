@@ -38,10 +38,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @AutoConfiguration
 class IdEncryptAutoConfiguration : WebMvcConfigurer {
     @Bean
-    fun idEncryptionUtils(
-        @Value("\${customize.common.idEncryptKey}") idEncryptKey: String,
-        @Value("\${customize.common.idEncryptIv}") idEncryptIv: String
-    ): IdEncryptionUtils {
-        return IdEncryptionUtils.init(idEncryptKey, idEncryptIv)
+    fun idEncryptionUtils(@Value("\${customize.common.idEncryptKey}") idEncryptKey: String): IdEncryptionUtils {
+        return IdEncryptionUtils.init(idEncryptKey)
     }
 }

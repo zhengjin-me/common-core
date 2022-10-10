@@ -39,14 +39,11 @@ object IdEncryptionUtils {
     private val logger = LoggerFactory.getLogger(IdEncryptionUtils::class.java)
     private lateinit var aes: AES
 
-    fun init(idEncryptKey: String, idEncryptIv: String): IdEncryptionUtils {
+    fun init(idEncryptKey: String): IdEncryptionUtils {
         if (idEncryptKey.length != 16) {
             throw ServiceException("密钥长度必须为16位")
         }
-        if (idEncryptIv.length != 16) {
-            throw ServiceException("偏移量长度必须为16位")
-        }
-        aes = AES(Mode.ECB, Padding.ZeroPadding, idEncryptKey.toByteArray(), idEncryptKey.toByteArray())
+        aes = AES(Mode.ECB, Padding.ZeroPadding, idEncryptKey.toByteArray())
         return this
     }
 
