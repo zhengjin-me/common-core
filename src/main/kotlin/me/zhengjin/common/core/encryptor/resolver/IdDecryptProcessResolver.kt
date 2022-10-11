@@ -49,6 +49,22 @@ class CustomizeMethodParameter(
     private val rawClass: Class<*>,
     private vararg val typeArguments: Type,
 ) : MethodParameter(parameter) {
+    override fun getParameterType(): Class<*> {
+        return if (typeArguments.isNotEmpty()) {
+            typeArguments[0] as Class<*>
+        } else {
+            rawClass
+        }
+    }
+
+    override fun getGenericParameterType(): Type {
+        return if (typeArguments.isNotEmpty()) {
+            nestedGenericParameterType
+        } else {
+            rawClass
+        }
+    }
+
     override fun getNestedGenericParameterType(): Type {
         return ParameterizedTypeImpl(typeArguments, null, rawClass)
     }
@@ -82,7 +98,7 @@ class IdDecryptProcessResolver(
             "java.lang.Long", "long", "java.lang.String", "string" -> {
                 val arg = resolver.resolveArgument(CustomizeMethodParameter(parameter, String::class.java), mavContainer, webRequest, binderFactory) ?: return null
                 val result = IdEncryptionUtils.decrypt(arg as String)
-                if (typeName === "java.lang.Long") {
+                if (listOf("java.lang.Long", "long").contains(typeName)) {
                     return result
                 }
                 return result.toString()
