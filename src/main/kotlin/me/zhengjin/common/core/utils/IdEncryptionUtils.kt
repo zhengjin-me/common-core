@@ -43,7 +43,7 @@ object IdEncryptionUtils {
         if (idEncryptKey.length != 16) {
             throw ServiceException("密钥长度必须为16位")
         }
-        aes = AES(Mode.ECB, Padding.ZeroPadding, idEncryptKey.toByteArray())
+        aes = AES(Mode.ECB, Padding.PKCS5Padding, idEncryptKey.toByteArray())
         return this
     }
 

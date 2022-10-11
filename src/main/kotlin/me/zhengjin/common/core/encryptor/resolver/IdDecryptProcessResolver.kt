@@ -68,7 +68,7 @@ class IdDecryptProcessResolver(
         return parameter.hasParameterAnnotation(IdDecrypt::class.java)
     }
 
-    override fun resolveArgument(parameter: MethodParameter, mavContainer: ModelAndViewContainer?, webRequest: NativeWebRequest, binderFactory: WebDataBinderFactory?): Any {
+    override fun resolveArgument(parameter: MethodParameter, mavContainer: ModelAndViewContainer?, webRequest: NativeWebRequest, binderFactory: WebDataBinderFactory?): Any? {
         val resolver: HandlerMethodArgumentResolver = if (parameter.hasParameterAnnotation(RequestBody::class.java)) {
             adapter.argumentResolvers!!.filterIsInstance<RequestResponseBodyMethodProcessor>().first()
         } else if (parameter.hasParameterAnnotation(RequestParam::class.java)) {
@@ -79,8 +79,8 @@ class IdDecryptProcessResolver(
             adapter.argumentResolvers!!.filterIsInstance<RequestHeaderMethodArgumentResolver>().first()
         } else throw ServiceException("未找到可处理的resolver")
         when (val typeName = parameter.nestedGenericParameterType.typeName) {
-            "java.lang.Long", "java.lang.String" -> {
-                val arg = resolver.resolveArgument(CustomizeMethodParameter(parameter, String::class.java), mavContainer, webRequest, binderFactory)
+            "java.lang.Long", "long", "java.lang.String", "string" -> {
+                val arg = resolver.resolveArgument(CustomizeMethodParameter(parameter, String::class.java), mavContainer, webRequest, binderFactory) ?: return null
                 val result = IdEncryptionUtils.decrypt(arg as String)
                 if (typeName === "java.lang.Long") {
                     return result
@@ -89,7 +89,7 @@ class IdDecryptProcessResolver(
             }
 
             "java.util.List<java.lang.Long>", "java.util.List<java.lang.String>" -> {
-                val arg = resolver.resolveArgument(CustomizeMethodParameter(parameter, List::class.java, String::class.java), mavContainer, webRequest, binderFactory)
+                val arg = resolver.resolveArgument(CustomizeMethodParameter(parameter, List::class.java, String::class.java), mavContainer, webRequest, binderFactory) ?: return null
                 val result = IdEncryptionUtils.decryptIds(arg as List<String>)
                 if (typeName == "java.util.List<java.lang.Long>") {
                     return result

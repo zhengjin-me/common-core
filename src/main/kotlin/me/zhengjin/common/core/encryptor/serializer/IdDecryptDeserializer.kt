@@ -43,8 +43,8 @@ class IdDecryptDeserializer : JsonDeserializer<Any>() {
         val clazz = (p.currentValue ?: p.parsingContext.parent.currentValue).javaClass
         val declaredField = ReflectionUtils.findField(clazz, p.currentName) ?: throw ServiceException("未在[${clazz.name}]中找到属性[${p.currentName}]")
         return when (declaredField.genericType.typeName) {
-            "java.lang.Long" -> IdEncryptionUtils.decrypt(p.valueAsString)
-            "java.lang.String" -> IdEncryptionUtils.decryptStr(p.valueAsString)
+            "java.lang.Long", "long" -> IdEncryptionUtils.decrypt(p.valueAsString)
+            "java.lang.String", "string" -> IdEncryptionUtils.decryptStr(p.valueAsString)
             "java.util.List<java.lang.Long>" -> {
                 val data: List<String> = p.readValueAs(object : TypeReference<List<String>>() {})
                 IdEncryptionUtils.decryptIds(data)
