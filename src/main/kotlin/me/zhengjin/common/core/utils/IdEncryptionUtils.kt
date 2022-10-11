@@ -24,6 +24,7 @@
 
 package me.zhengjin.common.core.utils
 
+import cn.hutool.core.codec.Base62
 import cn.hutool.crypto.Mode
 import cn.hutool.crypto.Padding
 import cn.hutool.crypto.symmetric.AES
@@ -48,19 +49,19 @@ object IdEncryptionUtils {
     }
 
     fun encrypt(id: Long): String {
-        return aes.encryptHex(id.toString())
+        return encryptStr(id.toString())
     }
 
     fun decrypt(id: String): Long {
-        return aes.decryptStr(id).toLong()
+        return decryptStr(id).toLong()
     }
 
     fun encryptStr(id: String): String {
-        return aes.encryptHex(id)
+        return Base62.encode(aes.encrypt(id.toByteArray()))
     }
 
     fun decryptStr(id: String): String {
-        return aes.decryptStr(id)
+        return aes.decrypt(Base62.decode(id.toByteArray())).toString()
     }
 
     fun encryptIgnoreError(id: Long?): String? {
