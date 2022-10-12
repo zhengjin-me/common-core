@@ -46,7 +46,7 @@ import javax.persistence.EntityManager
 import javax.sql.DataSource
 
 @AutoConfiguration
-@ConditionalOnExpression("T(org.springframework.util.StringUtils).hasText('\${customize.common.jpa.comment.alterTableNames}')")
+@ConditionalOnExpression("T(org.springframework.util.StringUtils).hasText('\${customize.common.jpa.comment.alterTableNames:}')")
 @ConditionalOnClass(EntityManager::class)
 class JpaCommentAutoConfiguration {
 
@@ -75,10 +75,12 @@ class JpaCommentAutoConfiguration {
          * MySQL:   库名
          * Oracle:  模式名
          */
-        @Value("\${customize.common.jpa.comment.schema}") configSchema: String? = null
+        @Value("\${customize.common.jpa.comment.schema:}") configSchema: String
     ): JpaCommentAdapter {
         val ds = dataSource.ifAvailable ?: throw RuntimeException("Can't find dataSource")
-        val schema = configSchema ?: ds.connection.catalog ?: throw RuntimeException("Can't find dataSource schema")
+        val schema = configSchema.ifBlank {
+            ds.connection.catalog ?: throw RuntimeException("Can't find dataSource schema")
+        }
         return when (val databaseName = getDatabaseName(ds)) {
             "mysql", "h2" -> MySQLCommentAdapter(schema, jdbcTemplate)
             "postgresql" -> PostgreSQLCommentAdapter(schema, jdbcTemplate)
@@ -96,11 +98,11 @@ class JpaCommentAutoConfiguration {
          * all 所有表
          * 指定表名, 多表名用英文逗号分割
          */
-        @Value("\${customize.common.jpa.comment.alterTableNames}") alterTableNames: String? = null
+        @Value("\${customize.common.jpa.comment.alterTableNames:}") alterTableNames: String
     ): JpaCommentService {
         val jpaCommentService = JpaCommentService(entityManager, jpaCommentAdapter)
         jpaCommentService.init()
-        if (!alterTableNames.isNullOrBlank()) {
+        if (alterTableNames.isNotBlank()) {
             when (alterTableNames) {
                 "all" -> jpaCommentService.alterAllTableAndColumn()
                 else -> {
