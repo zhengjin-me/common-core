@@ -31,11 +31,11 @@ import me.zhengjin.common.core.jpa.comment.adapter.OracleCommentAdapter
 import me.zhengjin.common.core.jpa.comment.adapter.PostgreSQLCommentAdapter
 import me.zhengjin.common.core.jpa.comment.service.JpaCommentService
 import org.springframework.beans.factory.ObjectProvider
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.jdbc.DatabaseDriver
 import org.springframework.context.annotation.Bean
 import org.springframework.jdbc.core.JdbcTemplate
@@ -46,12 +46,9 @@ import javax.persistence.EntityManager
 import javax.sql.DataSource
 
 @AutoConfiguration
-@EnableConfigurationProperties(JpaCommentProperties::class)
-@ConditionalOnProperty(prefix = "customize.common.jpa.comment", name = ["enable"], havingValue = "true")
+@ConditionalOnExpression("!T(org.springframework.util.StringUtils).hasText('\${customize.common.jpa.comment.alterTableNames}')")
 @ConditionalOnClass(EntityManager::class)
-class JpaCommentAutoConfiguration(
-    private val jpaCommentProperties: JpaCommentProperties
-) {
+class JpaCommentAutoConfiguration {
 
     /**
      * Get the current database type
@@ -71,9 +68,17 @@ class JpaCommentAutoConfiguration(
 
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
     @Bean
-    fun jpaCommentAdapter(dataSource: ObjectProvider<DataSource>, jdbcTemplate: JdbcTemplate): JpaCommentAdapter {
+    fun jpaCommentAdapter(
+        dataSource: ObjectProvider<DataSource>,
+        jdbcTemplate: JdbcTemplate,
+        /**
+         * MySQL:   库名
+         * Oracle:  模式名
+         */
+        @Value("\${customize.common.jpa.comment.schema}") configSchema: String? = null
+    ): JpaCommentAdapter {
         val ds = dataSource.ifAvailable ?: throw RuntimeException("Can't find dataSource")
-        val schema = jpaCommentProperties.schema ?: ds.connection.catalog ?: throw RuntimeException("Can't find dataSource schema")
+        val schema = configSchema ?: ds.connection.catalog ?: throw RuntimeException("Can't find dataSource schema")
         return when (val databaseName = getDatabaseName(ds)) {
             "mysql", "h2" -> MySQLCommentAdapter(schema, jdbcTemplate)
             "postgresql" -> PostgreSQLCommentAdapter(schema, jdbcTemplate)
@@ -84,14 +89,22 @@ class JpaCommentAutoConfiguration(
 
     @Bean
     @ConditionalOnMissingBean
-    fun jpaCommentService(entityManager: EntityManager, jpaCommentAdapter: JpaCommentAdapter): JpaCommentService {
+    fun jpaCommentService(
+        entityManager: EntityManager,
+        jpaCommentAdapter: JpaCommentAdapter,
+        /**
+         * all 所有表
+         * 指定表名, 多表名用英文逗号分割
+         */
+        @Value("\${customize.common.jpa.comment.alterTableNames}") alterTableNames: String? = null
+    ): JpaCommentService {
         val jpaCommentService = JpaCommentService(entityManager, jpaCommentAdapter)
         jpaCommentService.init()
-        if (!jpaCommentProperties.alterTableNames.isNullOrBlank()) {
-            when (jpaCommentProperties.alterTableNames) {
+        if (!alterTableNames.isNullOrBlank()) {
+            when (alterTableNames) {
                 "all" -> jpaCommentService.alterAllTableAndColumn()
                 else -> {
-                    jpaCommentProperties.alterTableNames?.split(",")?.forEach {
+                    alterTableNames.split(",").forEach {
                         jpaCommentService.alterTableAndColumn(it)
                     }
                 }
