@@ -22,31 +22,51 @@
  * SOFTWARE.
  */
 
-package me.zhengjin.common.core.jackson.autoconfig
+package me.zhengjin.common.core.resolver.autoconfig
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import me.zhengjin.common.core.encryptor.handler.SkipIdEncryptAnnotationHandler
+import me.zhengjin.common.core.encryptor.resolver.IdDecryptProcessResolver
 import me.zhengjin.common.core.jackson.handler.JacksonJsonCustomizeSerializeAnnotationHandler
+import org.springframework.beans.factory.config.BeanPostProcessor
 import org.springframework.boot.autoconfigure.AutoConfiguration
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
+import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
-import javax.annotation.PostConstruct
 
-@Suppress("SpringJavaInjectionPointsAutowiringInspection")
+/**
+ *
+ * @author fangzhengjin
+ * @create 2022-10-10 10:28
+ **/
 @AutoConfiguration
-@ConditionalOnBean(RequestMappingHandlerAdapter::class)
-class JacksonJsonCustomizeSerializeAnnotationHandlerAutoConfiguration(
-    private val requestMappingHandlerAdapter: RequestMappingHandlerAdapter,
+class CustomizeBeanPostProcessConfiguration(
     private val objectMapper: ObjectMapper?
-) {
+) : BeanPostProcessor {
+    override fun postProcessBeforeInitialization(bean: Any, beanName: String): Any? {
+        // 初始化之前不改变，原bean返回
+        return bean
+    }
 
-    @PostConstruct
-    fun register() {
-        requestMappingHandlerAdapter.returnValueHandlers?.let { returnValueHandlers ->
-            val newReturnValueHandlers = ArrayList<HandlerMethodReturnValueHandler>(returnValueHandlers.size + 1)
-            newReturnValueHandlers.add(0, JacksonJsonCustomizeSerializeAnnotationHandler(objectMapper))
-            newReturnValueHandlers.addAll(returnValueHandlers)
-            requestMappingHandlerAdapter.returnValueHandlers = newReturnValueHandlers
+    override fun postProcessAfterInitialization(bean: Any, beanName: String): Any? {
+        if (bean !is RequestMappingHandlerAdapter) {
+            return bean
         }
+
+        bean.argumentResolvers?.let { argumentResolvers ->
+            val newArgumentResolvers = ArrayList<HandlerMethodArgumentResolver>(argumentResolvers.size + 1)
+            newArgumentResolvers.add(0, IdDecryptProcessResolver(bean))
+            newArgumentResolvers.addAll(argumentResolvers)
+            bean.argumentResolvers = newArgumentResolvers
+        }
+
+        bean.returnValueHandlers?.let { returnValueHandlers ->
+            val newReturnValueHandlers = ArrayList<HandlerMethodReturnValueHandler>(returnValueHandlers.size + 2)
+            newReturnValueHandlers.add(0, SkipIdEncryptAnnotationHandler())
+            newReturnValueHandlers.add(1, JacksonJsonCustomizeSerializeAnnotationHandler(objectMapper))
+            newReturnValueHandlers.addAll(returnValueHandlers)
+            bean.returnValueHandlers = newReturnValueHandlers
+        }
+        return bean
     }
 }

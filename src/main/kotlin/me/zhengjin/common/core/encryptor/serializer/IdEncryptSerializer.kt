@@ -29,6 +29,8 @@ import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import me.zhengjin.common.core.exception.ServiceException
 import me.zhengjin.common.core.utils.IdEncryptionUtils
+import org.springframework.web.context.request.RequestAttributes
+import org.springframework.web.context.request.RequestContextHolder
 
 /**
  *
@@ -37,6 +39,14 @@ import me.zhengjin.common.core.utils.IdEncryptionUtils
  **/
 class IdEncryptSerializer : JsonSerializer<Any>() {
     override fun serialize(value: Any, gen: JsonGenerator?, serializers: SerializerProvider?) {
+        val requestAttributes = RequestContextHolder.getRequestAttributes()
+        if (requestAttributes != null) {
+            val skipEncrypt = requestAttributes.getAttribute("skipEncrypt", RequestAttributes.SCOPE_REQUEST)
+            if (skipEncrypt is Boolean && skipEncrypt == true) {
+                gen?.writeObject(value)
+                return
+            }
+        }
         when (value) {
             is Long -> gen?.writeString(IdEncryptionUtils.encrypt(value))
             is String -> gen?.writeString(IdEncryptionUtils.encryptStr(value))

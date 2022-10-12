@@ -26,6 +26,7 @@ package me.zhengjin.common.core.encryptor.resolver
 
 import cn.hutool.core.lang.ParameterizedTypeImpl
 import me.zhengjin.common.core.encryptor.annotation.IdDecrypt
+import me.zhengjin.common.core.encryptor.annotation.SkipIdDecrypt
 import me.zhengjin.common.core.exception.ServiceException
 import me.zhengjin.common.core.utils.IdEncryptionUtils
 import org.springframework.core.MethodParameter
@@ -81,7 +82,7 @@ class IdDecryptProcessResolver(
     private val adapter: RequestMappingHandlerAdapter
 ) : HandlerMethodArgumentResolver {
     override fun supportsParameter(parameter: MethodParameter): Boolean {
-        return parameter.hasParameterAnnotation(IdDecrypt::class.java)
+        return parameter.hasParameterAnnotation(IdDecrypt::class.java) && !(parameter.hasMethodAnnotation(SkipIdDecrypt::class.java) || parameter.declaringClass.isAnnotationPresent(SkipIdDecrypt::class.java))
     }
 
     override fun resolveArgument(parameter: MethodParameter, mavContainer: ModelAndViewContainer?, webRequest: NativeWebRequest, binderFactory: WebDataBinderFactory?): Any? {
