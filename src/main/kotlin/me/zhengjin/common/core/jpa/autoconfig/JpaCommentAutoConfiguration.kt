@@ -46,7 +46,7 @@ import javax.persistence.EntityManager
 import javax.sql.DataSource
 
 @AutoConfiguration
-@ConditionalOnExpression("!T(org.springframework.util.StringUtils).hasText('\${customize.common.jpa.comment.alterTableNames}')")
+@ConditionalOnExpression("T(org.springframework.util.StringUtils).hasText('\${customize.common.jpa.comment.alterTableNames}')")
 @ConditionalOnClass(EntityManager::class)
 class JpaCommentAutoConfiguration {
 
