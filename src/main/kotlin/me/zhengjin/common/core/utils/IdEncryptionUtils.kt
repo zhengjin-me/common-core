@@ -61,7 +61,7 @@ object IdEncryptionUtils {
     }
 
     fun decryptStr(id: String): String {
-        return aes.decrypt(Base62.decode(id.toByteArray())).toString()
+        return String(aes.decrypt(Base62.decode(id.toByteArray())))
     }
 
     fun encryptIgnoreError(id: Long?): String? {
