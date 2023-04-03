@@ -79,12 +79,13 @@ open class ServiceException(
             value: Boolean,
             exceptionType: ExceptionType = Exceptions.ILLEGAL_ARGUMENT,
             printStack: Boolean = false,
-            lazyMessage: () -> String?
+            message: String? = null,
+            lazyMessage: (() -> String)? = null
         ) {
             if (!value) {
                 throw ServiceException(
                     type = exceptionType,
-                    message = lazyMessage() ?: exceptionType.message,
+                    message = message ?: if (lazyMessage != null) lazyMessage() else exceptionType.message,
                     printStack = printStack,
                 )
             }
@@ -100,12 +101,13 @@ open class ServiceException(
             value: Any?,
             exceptionType: ExceptionType = Exceptions.ILLEGAL_ARGUMENT,
             printStack: Boolean = false,
-            lazyMessage: () -> String?
+            message: String? = null,
+            lazyMessage: (() -> String)? = null
         ) {
             if (value == null) {
                 throw ServiceException(
                     type = exceptionType,
-                    message = lazyMessage() ?: exceptionType.message,
+                    message = message ?: if (lazyMessage != null) lazyMessage() else exceptionType.message,
                     printStack = printStack,
                 )
             }
@@ -121,12 +123,13 @@ open class ServiceException(
             value: String?,
             exceptionType: ExceptionType = Exceptions.ILLEGAL_ARGUMENT,
             printStack: Boolean = false,
-            lazyMessage: () -> String?
+            message: String? = null,
+            lazyMessage: (() -> String)? = null
         ) {
             if (value.isNullOrBlank()) {
                 throw ServiceException(
                     type = exceptionType,
-                    message = lazyMessage() ?: exceptionType.message,
+                    message = message ?: if (lazyMessage != null) lazyMessage() else exceptionType.message,
                     printStack = printStack,
                 )
             }
@@ -142,12 +145,13 @@ open class ServiceException(
             value: List<Any>?,
             exceptionType: ExceptionType = Exceptions.ILLEGAL_ARGUMENT,
             printStack: Boolean = false,
-            lazyMessage: () -> String?
+            message: String? = null,
+            lazyMessage: (() -> String)? = null
         ) {
             if (value.isNullOrEmpty()) {
                 throw ServiceException(
                     type = exceptionType,
-                    message = lazyMessage() ?: exceptionType.message,
+                    message = message ?: if (lazyMessage != null) lazyMessage() else exceptionType.message,
                     printStack = printStack,
                 )
             }
