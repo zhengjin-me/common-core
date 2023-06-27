@@ -25,6 +25,7 @@
 package me.zhengjin.common.core.encryptor.serializer
 
 import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
@@ -39,9 +40,14 @@ import org.springframework.util.ReflectionUtils
  **/
 class IdDecryptDeserializer : JsonDeserializer<Any>() {
 
-    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Any {
-        val clazz = (p.currentValue ?: p.parsingContext.parent.currentValue).javaClass
-        val declaredField = ReflectionUtils.findField(clazz, p.currentName) ?: throw ServiceException("未在[${clazz.name}]中找到属性[${p.currentName}]")
+    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Any? {
+        var currentValue = p.currentValue ?: p.parsingContext.parent.currentValue
+        if (currentValue == null && p.hasToken(JsonToken.VALUE_STRING)) {
+            return IdEncryptionUtils.decrypt(p.valueAsString)
+        }
+        val clazz = currentValue.javaClass
+        val declaredField = ReflectionUtils.findField(clazz, p.currentName)
+                ?: throw ServiceException("未在[${clazz.name}]中找到属性[${p.currentName}]")
         return when (declaredField.genericType.typeName) {
             "java.lang.Long", "long" -> IdEncryptionUtils.decrypt(p.valueAsString)
             "java.lang.String", "string" -> IdEncryptionUtils.decryptStr(p.valueAsString)
